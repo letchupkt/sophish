@@ -2,4 +2,4 @@ requests
 colorama
 Flask
 flaredantic
-pyshortners
+pyshorteners
