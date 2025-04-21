@@ -20,7 +20,8 @@
 
 ## 📸 Demo Screenshot
 
-> *(Insert screenshots of the phishing page and terminal output here)*
+![image](https://github.com/user-attachments/assets/ce6a96ef-72b1-4792-947a-3885bb99be58)
+
 
 ---
 
